@@ -1,0 +1,17 @@
+[server]
+# Disable WebSocket compression - helps with firewalls that inspect/modify traffic
+enableWebsocketCompression = false
+
+# Allow connections from any origin
+enableCORS = false
+
+# Disable XSRF protection - some enterprise proxies strip these tokens
+enableXsrfProtection = false
+
+[browser]
+# Gather usage stats - set to false to reduce connections
+gatherUsageStats = false
+
+[client]
+# Show error details to help debug connection issues
+showErrorDetails = true
