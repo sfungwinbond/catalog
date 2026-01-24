@@ -3,615 +3,1144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Winbond Sample Request Portal</title>
+    <title>W29N04GZ SLC NAND Virtual Simulator</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f0f23 100%);
+            color: #00ff88;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
+
         .header {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
-            padding: 25px 30px;
-            color: white;
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+            padding: 20px;
+            border-bottom: 2px solid #00ff88;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 200%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,136,0.1), transparent);
+            animation: headerScan 3s linear infinite;
+        }
+
+        @keyframes headerScan {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(50%); }
+        }
+
         .header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+            font-size: 2rem;
+            text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88;
+            letter-spacing: 3px;
         }
-        .header p {
-            color: #a0c4e8;
-            font-size: 0.95rem;
+
+        .header .subtitle {
+            color: #888;
+            margin-top: 5px;
+            font-size: 0.9rem;
         }
+
         .container {
-            display: flex;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
             gap: 20px;
-        }
-        .sidebar {
-            width: 280px;
-            flex-shrink: 0;
-        }
-        .main {
-            flex: 1;
-            min-width: 0;
-        }
-        .form-panel {
-            width: 380px;
-            flex-shrink: 0;
-        }
-        .card {
-            background: white;
-            border-radius: 10px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            max-width: 1600px;
+            margin: 0 auto;
         }
-        .card h2 {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            color: #1e3a5f;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 10px;
+
+        .panel {
+            background: rgba(20, 20, 40, 0.9);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0,255,136,0.1);
         }
-        .card h3 {
+
+        .panel-title {
             font-size: 1rem;
-            margin: 15px 0 10px;
-            color: #444;
-        }
-        label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #555;
-        }
-        select, input[type="text"], input[type="email"], input[type="tel"], input[type="number"], textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 0.95rem;
+            color: #00ccff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
             margin-bottom: 15px;
-            transition: border-color 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: #2d5a87;
+
+        /* Chip Visualization */
+        .chip-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
-        textarea {
-            resize: vertical;
-            min-height: 80px;
+
+        .chip {
+            width: 280px;
+            height: 140px;
+            background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            border: 3px solid #444;
+            border-radius: 8px;
+            position: relative;
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.5),
+                inset 0 2px 10px rgba(255,255,255,0.05);
+            margin: 30px 0;
         }
-        .btn {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+
+        .chip::before {
+            content: 'WINBOND';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #666;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
         }
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(30,58,95,0.3);
+
+        .chip::after {
+            content: 'W29N04GZ';
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-size: 1.1rem;
+            font-weight: bold;
         }
-        .btn-small {
-            padding: 6px 14px;
+
+        .chip-label {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #555;
+            font-size: 0.7rem;
+        }
+
+        .chip-dot {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 30% 30%, #555, #222);
+            border-radius: 50%;
+        }
+
+        .pins-top, .pins-bottom {
+            display: flex;
+            justify-content: space-around;
+            width: 260px;
+        }
+
+        .pin {
+            width: 8px;
+            height: 20px;
+            background: linear-gradient(to bottom, #c0c0c0, #808080);
+            border-radius: 1px;
+            position: relative;
+            transition: all 0.15s;
+        }
+
+        .pin.active {
+            background: linear-gradient(to bottom, #00ff88, #00aa55);
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .pin.high {
+            background: linear-gradient(to bottom, #ff4444, #aa0000);
+            box-shadow: 0 0 10px #ff4444;
+        }
+
+        .pin-label {
+            position: absolute;
+            font-size: 0.5rem;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .pins-top .pin-label { top: -15px; left: 50%; transform: translateX(-50%); }
+        .pins-bottom .pin-label { bottom: -15px; left: 50%; transform: translateX(-50%); }
+
+        /* Pin Status Panel */
+        .pin-status {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .pin-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
             font-size: 0.8rem;
         }
-        .btn-remove {
-            background: #dc3545;
+
+        .pin-led {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #333;
+            border: 1px solid #555;
+            transition: all 0.15s;
         }
-        .btn-full {
-            width: 100%;
+
+        .pin-led.on {
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
         }
-        .category-section {
-            margin-bottom: 25px;
+
+        .pin-led.off {
+            background: #ff4444;
+            box-shadow: 0 0 10px #ff4444;
         }
-        .category-title {
-            font-size: 1.1rem;
-            color: #1e3a5f;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e8f4fd;
+
+        /* Memory Visualization */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 2px;
+            padding: 10px;
+            background: #0a0a15;
+            border-radius: 5px;
+            margin-bottom: 15px;
         }
-        .part-card {
-            background: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 15px;
-            transition: border-color 0.2s, box-shadow 0.2s;
+
+        .block {
+            aspect-ratio: 1;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
         }
-        .part-card:hover {
-            border-color: #2d5a87;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+        .block:hover {
+            background: #2a2a4e;
+            transform: scale(1.2);
+            z-index: 10;
         }
-        .part-card.selected {
-            border-color: #28a745;
-            background: #f0fff4;
+
+        .block.selected {
+            border-color: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
         }
-        .part-info {
-            flex: 1;
+
+        .block.programmed {
+            background: linear-gradient(135deg, #004400, #002200);
         }
-        .part-number {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #1e3a5f;
+
+        .block.erased {
+            background: linear-gradient(135deg, #1a1a2e, #0a0a1e);
         }
-        .part-desc {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 4px;
+
+        .block.bad {
+            background: linear-gradient(135deg, #440000, #220000);
         }
-        .part-specs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
+
+        .block.busy {
+            animation: blockBusy 0.5s ease-in-out infinite;
         }
-        .spec-tag {
-            background: #e3f2fd;
-            color: #1565c0;
-            padding: 3px 10px;
-            border-radius: 12px;
+
+        @keyframes blockBusy {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Command Console */
+        .console {
+            background: #0a0a15;
+            border: 1px solid #333;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            padding: 10px;
             font-size: 0.75rem;
-            font-weight: 500;
+            margin-bottom: 15px;
         }
-        .part-actions {
-            flex-shrink: 0;
+
+        .console-line {
+            margin: 3px 0;
+            opacity: 0.9;
         }
-        .selected-parts {
-            margin-bottom: 20px;
+
+        .console-line.cmd { color: #00ccff; }
+        .console-line.ok { color: #00ff88; }
+        .console-line.err { color: #ff4444; }
+        .console-line.info { color: #ffaa00; }
+        .console-line.data { color: #aa88ff; }
+
+        /* Command Buttons */
+        .cmd-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
         }
-        .selected-item {
+
+        .cmd-btn {
+            background: linear-gradient(145deg, #1a1a2e, #252540);
+            border: 1px solid #444;
+            color: #00ff88;
+            padding: 12px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .cmd-btn:hover {
+            background: linear-gradient(145deg, #252540, #303055);
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0,255,136,0.3);
+            transform: translateY(-2px);
+        }
+
+        .cmd-btn:active {
+            transform: translateY(0);
+        }
+
+        .cmd-btn.danger { color: #ff4444; border-color: #ff4444; }
+        .cmd-btn.warning { color: #ffaa00; border-color: #ffaa00; }
+
+        /* Timing Diagram */
+        .timing-container {
+            background: #0a0a15;
+            border-radius: 5px;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .timing-signal {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            height: 25px;
+        }
+
+        .timing-label {
+            width: 50px;
+            font-size: 0.7rem;
+            color: #888;
+        }
+
+        .timing-wave {
+            flex: 1;
+            height: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wave-line {
+            position: absolute;
+            height: 100%;
+            width: 200%;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 10px,
+                #00ff88 10px,
+                #00ff88 11px
+            );
+        }
+
+        .wave-data {
+            position: absolute;
+            height: 100%;
+            width: 200%;
+            background: linear-gradient(90deg,
+                #1a1a2e 0%, #1a1a2e 20%,
+                #00ff88 20%, #00ff88 22%,
+                #1a1a2e 22%, #1a1a2e 40%,
+                #00ff88 40%, #00ff88 42%,
+                #1a1a2e 42%, #1a1a2e 60%,
+                #00ff88 60%, #00ff88 62%,
+                #1a1a2e 62%, #1a1a2e 100%
+            );
+            animation: waveScroll 2s linear infinite;
+        }
+
+        @keyframes waveScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Stats Panel */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            color: #00ccff;
+            text-shadow: 0 0 10px rgba(0,204,255,0.5);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Address Input */
+        .address-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .address-input input {
+            flex: 1;
+            background: #0a0a15;
+            border: 1px solid #333;
+            color: #00ff88;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .address-input input:focus {
+            outline: none;
+            border-color: #00ff88;
+        }
+
+        /* Data View */
+        .data-view {
+            background: #0a0a15;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 0.65rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .data-row {
+            display: flex;
+            margin: 2px 0;
+        }
+
+        .data-addr {
+            color: #666;
+            width: 70px;
+        }
+
+        .data-hex {
+            color: #00ccff;
+            flex: 1;
+            letter-spacing: 1px;
+        }
+
+        .data-ascii {
+            color: #aa88ff;
+            width: 80px;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #1a1a2e, #16213e);
+            border-top: 1px solid #333;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 12px;
-            background: #e8f4fd;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
-        .selected-count {
-            background: #1e3a5f;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            display: inline-block;
-            margin-bottom: 15px;
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .divider {
-            height: 1px;
-            background: #e0e0e0;
-            margin: 20px 0;
+
+        .status-led {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: statusPulse 2s ease-in-out infinite;
         }
-        .alert {
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
+
+        .status-led.busy {
+            background: #ffaa00;
+            animation: statusBusy 0.3s ease-in-out infinite;
         }
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 5px #00ff88; }
+            50% { opacity: 0.7; box-shadow: 0 0 15px #00ff88; }
         }
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+
+        @keyframes statusBusy {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
-        .alert-info {
-            background: #e8f4fd;
-            color: #1e3a5f;
-            border: 1px solid #b8daff;
-        }
-        .hidden {
+
+        /* Page View Modal */
+        .page-modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
         }
+
+        .page-modal.active { display: flex; }
+
+        .page-modal-content {
+            background: #1a1a2e;
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .page-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ff4444;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Responsive */
         @media (max-width: 1200px) {
             .container {
-                flex-direction: column;
-            }
-            .sidebar, .form-panel {
-                width: 100%;
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Winbond Sample Request Portal</h1>
-        <p>Internal Tool for Sales & FAE Teams - Select Parts and Submit Sample Requests</p>
+        <h1>W29N04GZ NAND SIMULATOR</h1>
+        <div class="subtitle">4Gb SLC NAND Flash | Winbond Electronics | Verilog Model Visualizer</div>
     </div>
 
     <div class="container">
-        <div class="sidebar">
-            <div class="card">
-                <h2>Part Selector</h2>
+        <!-- Left Panel - Chip & Pins -->
+        <div class="panel">
+            <div class="panel-title">Chip Package - TSOP-48</div>
 
-                <label for="categoryFilter">Product Category</label>
-                <select id="categoryFilter">
-                    <option value="all">All Categories</option>
-                    <option value="SLC NAND Flash">SLC NAND Flash</option>
-                    <option value="Serial NAND Flash">Serial NAND Flash</option>
-                    <option value="NOR Flash">NOR Flash</option>
-                    <option value="DRAM">DRAM</option>
-                </select>
-
-                <label for="densityFilter">Density</label>
-                <select id="densityFilter">
-                    <option value="all">All Densities</option>
-                </select>
-
-                <label for="interfaceFilter">Interface</label>
-                <select id="interfaceFilter">
-                    <option value="all">All Interfaces</option>
-                </select>
-
-                <label for="tempFilter">Temperature Range</label>
-                <select id="tempFilter">
-                    <option value="all">All Ranges</option>
-                    <option value="commercial">Commercial (-40°C to 85°C)</option>
-                    <option value="industrial">Industrial (-40°C to 105°C)</option>
-                </select>
-
-                <label for="searchInput">Search Part Number</label>
-                <input type="text" id="searchInput" placeholder="e.g., W25N01">
-
-                <div class="divider"></div>
-                <div class="selected-count">Selected Parts: <span id="selectedCount">0</span></div>
-            </div>
-        </div>
-
-        <div class="main">
-            <div class="card">
-                <h2>Available Parts</h2>
-                <div id="partsContainer"></div>
-            </div>
-        </div>
-
-        <div class="form-panel">
-            <div class="card">
-                <h2>Sample Request Form</h2>
-
-                <div id="alertContainer"></div>
-
-                <div class="selected-parts">
-                    <h3>Selected Parts</h3>
-                    <div id="selectedPartsContainer">
-                        <div class="alert alert-info">Select parts from the catalog to add to your sample request.</div>
-                    </div>
+            <div class="chip-container">
+                <div class="pins-top" id="pinsTop"></div>
+                <div class="chip">
+                    <div class="chip-dot"></div>
+                    <div class="chip-label">4Gb SLC NAND</div>
                 </div>
-
-                <div class="divider"></div>
-
-                <form id="requestForm">
-                    <h3>Request Details</h3>
-                    <label for="requesterName">Your Name *</label>
-                    <input type="text" id="requesterName" placeholder="John Smith" required>
-
-                    <label for="requesterEmail">Email *</label>
-                    <input type="email" id="requesterEmail" placeholder="john.smith@company.com" required>
-
-                    <label for="requesterPhone">Phone</label>
-                    <input type="tel" id="requesterPhone" placeholder="+1-555-123-4567">
-
-                    <div class="divider"></div>
-
-                    <h3>Customer Information</h3>
-                    <label for="customerName">Customer/Company Name *</label>
-                    <input type="text" id="customerName" placeholder="Acme Corporation" required>
-
-                    <label for="customerContact">Customer Contact</label>
-                    <input type="text" id="customerContact" placeholder="Jane Doe">
-
-                    <label for="customerLocation">Region</label>
-                    <select id="customerLocation">
-                        <option>North America</option>
-                        <option>Europe</option>
-                        <option>Asia Pacific</option>
-                        <option>Greater China</option>
-                        <option>Japan</option>
-                        <option>Korea</option>
-                        <option>Other</option>
-                    </select>
-
-                    <div class="divider"></div>
-
-                    <h3>Application Details</h3>
-                    <label for="applicationType">Target Application *</label>
-                    <select id="applicationType" required>
-                        <option>Payment Terminal / POS</option>
-                        <option>Industrial Automation / Building Controls</option>
-                        <option>Networking Equipment (Router/Switch)</option>
-                        <option>Satellite Communication / SBD</option>
-                        <option>Automotive</option>
-                        <option>Consumer Electronics</option>
-                        <option>IoT / Smart Home</option>
-                        <option>Medical Devices</option>
-                        <option>Military / Aerospace</option>
-                        <option>Other</option>
-                    </select>
-
-                    <label for="currentSolution">Current Solution (if displacing competitor)</label>
-                    <textarea id="currentSolution" placeholder="e.g., Currently using MXIC MX29LV640 parallel NOR flash"></textarea>
-
-                    <label for="annualVolume">Estimated Annual Volume</label>
-                    <select id="annualVolume">
-                        <option>< 10K units</option>
-                        <option>10K - 50K units</option>
-                        <option>50K - 100K units</option>
-                        <option>100K - 500K units</option>
-                        <option>500K - 1M units</option>
-                        <option>> 1M units</option>
-                    </select>
-
-                    <label for="sampleQty">Sample Quantity Requested</label>
-                    <input type="number" id="sampleQty" min="1" max="100" value="10">
-
-                    <label for="urgency">Urgency Level</label>
-                    <select id="urgency">
-                        <option>Standard (2-3 weeks)</option>
-                        <option>Expedited (1 week)</option>
-                        <option>Critical (ASAP)</option>
-                    </select>
-
-                    <label for="notes">Additional Notes</label>
-                    <textarea id="notes" placeholder="Any special requirements, technical questions, or context..."></textarea>
-
-                    <div class="divider"></div>
-
-                    <button type="submit" class="btn btn-full">Submit Sample Request</button>
-                </form>
+                <div class="pins-bottom" id="pinsBottom"></div>
             </div>
+
+            <div class="panel-title" style="margin-top: 20px;">Pin Status</div>
+            <div class="pin-status" id="pinStatus"></div>
+        </div>
+
+        <!-- Center Panel - Memory View & Console -->
+        <div class="panel">
+            <div class="panel-title">Memory Array (4096 Blocks × 64 Pages × 2112 Bytes)</div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <span style="font-size: 0.7rem;">Block View (256 shown):</span>
+                <span style="font-size: 0.7rem; color: #004400;">■ Programmed</span>
+                <span style="font-size: 0.7rem; color: #1a1a2e;">■ Erased</span>
+                <span style="font-size: 0.7rem; color: #440000;">■ Bad</span>
+            </div>
+
+            <div class="memory-grid" id="memoryGrid"></div>
+
+            <div class="panel-title">Command Console</div>
+            <div class="console" id="console"></div>
+
+            <div class="panel-title">Timing Diagram</div>
+            <div class="timing-container" id="timingDiagram">
+                <div class="timing-signal">
+                    <div class="timing-label">CLE</div>
+                    <div class="timing-wave"><div class="wave-line" id="waveCLE"></div></div>
+                </div>
+                <div class="timing-signal">
+                    <div class="timing-label">ALE</div>
+                    <div class="timing-wave"><div class="wave-line" id="waveALE"></div></div>
+                </div>
+                <div class="timing-signal">
+                    <div class="timing-label">WE#</div>
+                    <div class="timing-wave"><div class="wave-line" id="waveWE"></div></div>
+                </div>
+                <div class="timing-signal">
+                    <div class="timing-label">RE#</div>
+                    <div class="timing-wave"><div class="wave-line" id="waveRE"></div></div>
+                </div>
+                <div class="timing-signal">
+                    <div class="timing-label">I/O</div>
+                    <div class="timing-wave"><div class="wave-data" id="waveIO"></div></div>
+                </div>
+                <div class="timing-signal">
+                    <div class="timing-label">R/B#</div>
+                    <div class="timing-wave"><div class="wave-line" id="waveRB"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Commands & Stats -->
+        <div class="panel">
+            <div class="panel-title">NAND Commands</div>
+
+            <div class="address-input">
+                <input type="text" id="blockAddr" placeholder="Block (0-4095)" value="0">
+                <input type="text" id="pageAddr" placeholder="Page (0-63)" value="0">
+            </div>
+
+            <div class="cmd-grid">
+                <button class="cmd-btn" onclick="cmdReadID()">Read ID (90h)</button>
+                <button class="cmd-btn" onclick="cmdReadParam()">Read Param (ECh)</button>
+                <button class="cmd-btn" onclick="cmdReadPage()">Read Page (00h-30h)</button>
+                <button class="cmd-btn" onclick="cmdReadStatus()">Read Status (70h)</button>
+                <button class="cmd-btn" onclick="cmdProgram()">Program (80h-10h)</button>
+                <button class="cmd-btn warning" onclick="cmdErase()">Erase Block (60h-D0h)</button>
+                <button class="cmd-btn" onclick="cmdReset()">Reset (FFh)</button>
+                <button class="cmd-btn danger" onclick="cmdChipErase()">Full Chip Erase</button>
+            </div>
+
+            <div class="panel-title">Chip Specifications</div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">4Gb</div>
+                    <div class="stat-label">Density</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">4096</div>
+                    <div class="stat-label">Blocks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">64</div>
+                    <div class="stat-label">Pages/Block</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">2112</div>
+                    <div class="stat-label">Bytes/Page</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">100K</div>
+                    <div class="stat-label">P/E Cycles</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statErase">0</div>
+                    <div class="stat-label">Erases Done</div>
+                </div>
+            </div>
+
+            <div class="panel-title" style="margin-top: 15px;">Page Data View</div>
+            <div class="data-view" id="dataView">
+                <div class="data-row">
+                    <span class="data-addr">0x0000:</span>
+                    <span class="data-hex">FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF</span>
+                    <span class="data-ascii">................</span>
+                </div>
+            </div>
+
+            <div class="panel-title" style="margin-top: 15px;">Timing Parameters</div>
+            <div style="font-size: 0.7rem; color: #888;">
+                <div>tR (Page Read): 25µs</div>
+                <div>tPROG (Program): 250µs</div>
+                <div>tBERS (Block Erase): 2ms</div>
+                <div>tRC (Read Cycle): 25ns</div>
+                <div>tWC (Write Cycle): 25ns</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-indicator">
+            <div class="status-led" id="statusLed"></div>
+            <span id="statusText">READY - Chip Idle</span>
+        </div>
+        <div>
+            <span style="color: #666;">State: </span>
+            <span id="stateText" style="color: #00ccff;">IDLE (0x00)</span>
+        </div>
+        <div style="color: #666;">
+            Model: W29N04GZ | VCC: 3.3V | Temp: 25°C
+        </div>
+    </div>
+
+    <!-- Page View Modal -->
+    <div class="page-modal" id="pageModal">
+        <div class="page-modal-content">
+            <div class="page-modal-header">
+                <h3>Block <span id="modalBlock">0</span> Details</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalContent"></div>
         </div>
     </div>
 
     <script>
-        // Winbond Part Catalog Data
-        const WINBOND_CATALOG = {
-            "SLC NAND Flash": [
-                {part_number: "W29N01GVSIAA", density: "1Gb", interface: "Parallel", package: "TSOP-48", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "1Gb SLC NAND, x8 bus width, 100K P/E cycles"},
-                {part_number: "W29N02GVSIAA", density: "2Gb", interface: "Parallel", package: "TSOP-48", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "2Gb SLC NAND, x8 bus width, 100K P/E cycles"},
-                {part_number: "W29N04GVSIAA", density: "4Gb", interface: "Parallel", package: "TSOP-48", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "4Gb SLC NAND, x8 bus width, 100K P/E cycles"},
-                {part_number: "W29N08GVSIAA", density: "8Gb", interface: "Parallel", package: "TSOP-48", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "8Gb SLC NAND, x8 bus width, 100K P/E cycles"},
-                {part_number: "W29N01GVSI4A", density: "1Gb", interface: "Parallel", package: "TSOP-48", voltage: "3.3V", temp_range: "-40°C to 105°C", description: "1Gb Industrial SLC NAND, extended temp"},
-                {part_number: "W29N02GVSI4A", density: "2Gb", interface: "Parallel", package: "TSOP-48", voltage: "3.3V", temp_range: "-40°C to 105°C", description: "2Gb Industrial SLC NAND, extended temp"},
-            ],
-            "Serial NAND Flash": [
-                {part_number: "W25N512GV", density: "512Mb", interface: "SPI", package: "SOIC-8", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "512Mb Serial NAND, SPI interface, 100K P/E cycles"},
-                {part_number: "W25N01GV", density: "1Gb", interface: "SPI", package: "SOIC-8", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "1Gb Serial NAND, SPI interface, 100K P/E cycles"},
-                {part_number: "W25N02GV", density: "2Gb", interface: "SPI", package: "SOIC-8", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "2Gb Serial NAND, SPI interface, 100K P/E cycles"},
-                {part_number: "W25N04KV", density: "4Gb", interface: "SPI", package: "SOIC-8", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "4Gb Serial NAND, SPI interface, 100K P/E cycles"},
-                {part_number: "W25N01GVZEIG", density: "1Gb", interface: "SPI", package: "WSON-8", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "1Gb Serial NAND, compact WSON package"},
-                {part_number: "W25N02KVZEIR", density: "2Gb", interface: "SPI", package: "WSON-8", voltage: "3.3V", temp_range: "-40°C to 105°C", description: "2Gb Industrial Serial NAND, extended temp"},
-            ],
-            "NOR Flash": [
-                {part_number: "W25Q512JV", density: "512Mb", interface: "SPI/QPI", package: "SOIC-16", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "512Mb Quad SPI NOR, DTR support, 100K P/E cycles"},
-                {part_number: "W25Q256JV", density: "256Mb", interface: "SPI/QPI", package: "SOIC-16", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "256Mb Quad SPI NOR, DTR support"},
-                {part_number: "W25Q128JV", density: "128Mb", interface: "SPI/QPI", package: "SOIC-8", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "128Mb Quad SPI NOR, popular general purpose"},
-                {part_number: "W25Q64JV", density: "64Mb", interface: "SPI/QPI", package: "SOIC-8", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "64Mb Quad SPI NOR"},
-                {part_number: "W25Q32JV", density: "32Mb", interface: "SPI/QPI", package: "SOIC-8", voltage: "3.3V", temp_range: "-40°C to 85°C", description: "32Mb Quad SPI NOR"},
-                {part_number: "W25Q128JVSIQ", density: "128Mb", interface: "SPI/QPI", package: "SOIC-8", voltage: "3.3V", temp_range: "-40°C to 105°C", description: "128Mb Industrial NOR, extended temp"},
-            ],
-            "DRAM": [
-                {part_number: "W9425G6KH-5", density: "256Mb", interface: "DDR", package: "FBGA-60", voltage: "2.5V", temp_range: "-40°C to 85°C", description: "256Mb DDR SDRAM, 200MHz"},
-                {part_number: "W9751G6KB-25", density: "512Mb", interface: "DDR2", package: "FBGA-84", voltage: "1.8V", temp_range: "-40°C to 85°C", description: "512Mb DDR2 SDRAM, 400MHz"},
-                {part_number: "W631GG6KB-12", density: "1Gb", interface: "DDR3", package: "FBGA-96", voltage: "1.5V", temp_range: "-40°C to 85°C", description: "1Gb DDR3 SDRAM, 800MHz"},
-                {part_number: "W632GG6NB-12", density: "2Gb", interface: "DDR3", package: "FBGA-96", voltage: "1.35V", temp_range: "-40°C to 85°C", description: "2Gb DDR3L SDRAM, low power"},
-            ]
+        // W29N04GZ Simulator State
+        const NAND = {
+            // Chip parameters from Verilog model
+            BLOCK_COUNT: 4096,
+            PAGES_PER_BLOCK: 64,
+            PAGE_SIZE: 2112,
+            SPARE_SIZE: 64,
+            IO_WIDTH: 8,
+
+            // Timing (microseconds)
+            tR: 25,
+            tPROG: 250,
+            tBERS: 2000,
+            tRST: 5,
+
+            // State machine states (from Verilog)
+            states: {
+                IDLE: 0x00,
+                A_LATCH_RD: 0x01,
+                BSYR: 0x06,
+                RD: 0x09,
+                RD_ID: 0x0C,
+                RD_PARAM: 0x0E,
+                BSYPROG: 0x0F,
+                DATA_IN: 0x16,
+                BSYERS: 0x19,
+                BSYRST: 0x1C
+            },
+
+            // Current state
+            state: 0x00,
+            busy: false,
+            eraseCount: 0,
+
+            // Pin states
+            pins: {
+                CLE: 0, ALE: 0, CEN: 1, REN: 1, WEN: 1, WPN: 1, RY_BY: 1
+            },
+
+            // Memory simulation (sparse - only track modified blocks)
+            memory: new Map(),
+            badBlocks: new Set([7, 42, 128, 256, 1024]), // Simulated bad blocks
+
+            // ID data
+            idData: [0xEF, 0xAC, 0x90, 0x15, 0x54], // Winbond W29N04GZ
+
+            // Status register
+            status: 0xE0 // Ready, no errors
         };
 
-        let selectedParts = [];
+        // Pin definitions for TSOP-48
+        const pinDefs = {
+            top: ['NC', 'IO7', 'IO6', 'IO5', 'IO4', 'VCC', 'VSS', 'NC', 'NC', 'IO3', 'IO2', 'IO1', 'IO0', 'NC', 'NC', 'CLE', 'ALE', 'CE#', 'VSS', 'NC', 'NC', 'NC', 'WP#', 'NC'],
+            bottom: ['NC', 'R/B#', 'RE#', 'NC', 'VCC', 'NC', 'NC', 'NC', 'WE#', 'NC', 'NC', 'NC', 'NC', 'NC', 'NC', 'NC', 'VSS', 'NC', 'NC', 'NC', 'NC', 'VCC', 'NC', 'NC']
+        };
 
-        // Initialize filters
-        function initFilters() {
-            const densities = new Set();
-            const interfaces = new Set();
+        const controlPins = ['CLE', 'ALE', 'CE#', 'RE#', 'WE#', 'WP#', 'R/B#'];
 
-            Object.values(WINBOND_CATALOG).forEach(parts => {
-                parts.forEach(part => {
-                    densities.add(part.density);
-                    interfaces.add(part.interface);
-                });
+        // Initialize UI
+        function init() {
+            createPins();
+            createPinStatus();
+            createMemoryGrid();
+            log('info', 'W29N04GZ Virtual Simulator Initialized');
+            log('info', 'Verilog Model: w29n04gz.vp');
+            log('ok', 'Power-on sequence complete (tPON = 5ms)');
+            log('info', 'Ready for commands...');
+            updateDataView();
+        }
+
+        function createPins() {
+            const topPins = document.getElementById('pinsTop');
+            const bottomPins = document.getElementById('pinsBottom');
+
+            pinDefs.top.forEach((name, i) => {
+                const pin = document.createElement('div');
+                pin.className = 'pin';
+                pin.innerHTML = `<span class="pin-label">${i+1}</span>`;
+                pin.dataset.name = name;
+                topPins.appendChild(pin);
             });
 
-            const densitySelect = document.getElementById('densityFilter');
-            [...densities].sort((a, b) => {
-                const aVal = parseFloat(a.replace('Gb', '000').replace('Mb', ''));
-                const bVal = parseFloat(b.replace('Gb', '000').replace('Mb', ''));
-                return aVal - bVal;
-            }).forEach(d => {
-                densitySelect.innerHTML += `<option value="${d}">${d}</option>`;
-            });
-
-            const interfaceSelect = document.getElementById('interfaceFilter');
-            [...interfaces].sort().forEach(i => {
-                interfaceSelect.innerHTML += `<option value="${i}">${i}</option>`;
+            pinDefs.bottom.forEach((name, i) => {
+                const pin = document.createElement('div');
+                pin.className = 'pin';
+                pin.innerHTML = `<span class="pin-label">${48-i}</span>`;
+                pin.dataset.name = name;
+                bottomPins.appendChild(pin);
             });
         }
 
-        // Render parts
-        function renderParts() {
-            const container = document.getElementById('partsContainer');
-            const categoryFilter = document.getElementById('categoryFilter').value;
-            const densityFilter = document.getElementById('densityFilter').value;
-            const interfaceFilter = document.getElementById('interfaceFilter').value;
-            const tempFilter = document.getElementById('tempFilter').value;
-            const searchTerm = document.getElementById('searchInput').value.toUpperCase();
-
-            container.innerHTML = '';
-
-            Object.entries(WINBOND_CATALOG).forEach(([category, parts]) => {
-                if (categoryFilter !== 'all' && category !== categoryFilter) return;
-
-                const filteredParts = parts.filter(part => {
-                    if (densityFilter !== 'all' && part.density !== densityFilter) return false;
-                    if (interfaceFilter !== 'all' && part.interface !== interfaceFilter) return false;
-                    if (tempFilter === 'commercial' && part.temp_range.includes('105°C')) return false;
-                    if (tempFilter === 'industrial' && !part.temp_range.includes('105°C')) return false;
-                    if (searchTerm && !part.part_number.toUpperCase().includes(searchTerm)) return false;
-                    return true;
-                });
-
-                if (filteredParts.length === 0) return;
-
-                const section = document.createElement('div');
-                section.className = 'category-section';
-                section.innerHTML = `<div class="category-title">${category}</div>`;
-
-                filteredParts.forEach(part => {
-                    const isSelected = selectedParts.some(p => p.part_number === part.part_number);
-                    const partCard = document.createElement('div');
-                    partCard.className = `part-card ${isSelected ? 'selected' : ''}`;
-                    partCard.innerHTML = `
-                        <div class="part-info">
-                            <div class="part-number">${part.part_number}</div>
-                            <div class="part-desc">${part.description}</div>
-                            <div class="part-specs">
-                                <span class="spec-tag">${part.density}</span>
-                                <span class="spec-tag">${part.interface}</span>
-                                <span class="spec-tag">${part.package}</span>
-                                <span class="spec-tag">${part.temp_range}</span>
-                            </div>
-                        </div>
-                        <div class="part-actions">
-                            <button class="btn btn-small ${isSelected ? 'btn-remove' : ''}" onclick="togglePart('${part.part_number}', '${category}')">
-                                ${isSelected ? 'Remove' : 'Add'}
-                            </button>
-                        </div>
-                    `;
-                    section.appendChild(partCard);
-                });
-
-                container.appendChild(section);
+        function createPinStatus() {
+            const container = document.getElementById('pinStatus');
+            controlPins.forEach(pin => {
+                const item = document.createElement('div');
+                item.className = 'pin-item';
+                const isActive = pin === 'R/B#';
+                item.innerHTML = `
+                    <div class="pin-led ${isActive ? 'on' : ''}" id="led${pin.replace(/[#\/]/g, '')}"></div>
+                    <span>${pin}</span>
+                `;
+                container.appendChild(item);
             });
         }
 
-        // Toggle part selection
-        function togglePart(partNumber, category) {
-            const existingIndex = selectedParts.findIndex(p => p.part_number === partNumber);
-
-            if (existingIndex >= 0) {
-                selectedParts.splice(existingIndex, 1);
-            } else {
-                const part = WINBOND_CATALOG[category].find(p => p.part_number === partNumber);
-                if (part) {
-                    selectedParts.push({...part, category});
+        function createMemoryGrid() {
+            const grid = document.getElementById('memoryGrid');
+            for (let i = 0; i < 256; i++) {
+                const block = document.createElement('div');
+                block.className = 'block';
+                const blockNum = i * 16;
+                if (NAND.badBlocks.has(blockNum)) {
+                    block.classList.add('bad');
                 }
-            }
-
-            updateSelectedDisplay();
-            renderParts();
-        }
-
-        // Update selected parts display
-        function updateSelectedDisplay() {
-            document.getElementById('selectedCount').textContent = selectedParts.length;
-
-            const container = document.getElementById('selectedPartsContainer');
-            if (selectedParts.length === 0) {
-                container.innerHTML = '<div class="alert alert-info">Select parts from the catalog to add to your sample request.</div>';
-            } else {
-                container.innerHTML = selectedParts.map((part, idx) => `
-                    <div class="selected-item">
-                        <span><strong>${idx + 1}.</strong> ${part.part_number} (${part.density})</span>
-                        <button class="btn btn-small btn-remove" onclick="togglePart('${part.part_number}', '${part.category}')">×</button>
-                    </div>
-                `).join('');
+                block.dataset.block = blockNum;
+                block.onclick = () => showBlockDetails(blockNum);
+                block.title = `Block ${blockNum}`;
+                grid.appendChild(block);
             }
         }
 
-        // Show alert
-        function showAlert(message, type) {
-            const container = document.getElementById('alertContainer');
-            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            setTimeout(() => container.innerHTML = '', 5000);
+        function log(type, msg) {
+            const console = document.getElementById('console');
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            line.textContent = `[${time}] ${msg}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
         }
 
-        // Form submission
-        document.getElementById('requestForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        function setStatus(busy, text, state) {
+            NAND.busy = busy;
+            NAND.state = state;
 
-            if (selectedParts.length === 0) {
-                showAlert('Please select at least one part for the sample request.', 'error');
+            const led = document.getElementById('statusLed');
+            led.className = `status-led ${busy ? 'busy' : ''}`;
+            document.getElementById('statusText').textContent = text;
+            document.getElementById('stateText').textContent =
+                `${Object.keys(NAND.states).find(k => NAND.states[k] === state) || 'UNKNOWN'} (0x${state.toString(16).padStart(2, '0').toUpperCase()})`;
+
+            // Update R/B# LED
+            document.getElementById('ledRB').className = `pin-led ${busy ? 'off' : 'on'}`;
+        }
+
+        function animatePins(pins, duration = 100) {
+            pins.forEach(p => {
+                const led = document.getElementById(`led${p.replace(/[#\/]/g, '')}`);
+                if (led) {
+                    led.classList.add('on');
+                    setTimeout(() => led.classList.remove('on'), duration);
+                }
+            });
+        }
+
+        function animateBlock(blockNum, className) {
+            const blocks = document.querySelectorAll('.block');
+            const idx = Math.floor(blockNum / 16);
+            if (blocks[idx]) {
+                blocks[idx].classList.add(className);
+                setTimeout(() => blocks[idx].classList.remove(className), 500);
+            }
+        }
+
+        // NAND Commands
+        async function cmdReadID() {
+            log('cmd', '>> READ ID (90h)');
+            animatePins(['CLE', 'WE']);
+            setStatus(true, 'BUSY - Reading ID', NAND.states.RD_ID);
+
+            await delay(50);
+
+            log('data', `ID: ${NAND.idData.map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' ')}`);
+            log('info', 'Manufacturer: Winbond (EFh)');
+            log('info', 'Device: W29N04GZ (ACh 90h)');
+            log('info', 'Features: 4Gb, x8, SLC');
+
+            setStatus(false, 'READY - ID Read Complete', NAND.states.IDLE);
+        }
+
+        async function cmdReadParam() {
+            log('cmd', '>> READ PARAMETER PAGE (ECh)');
+            animatePins(['CLE', 'WE']);
+            setStatus(true, 'BUSY - Reading Parameters', NAND.states.RD_PARAM);
+
+            await delay(NAND.tR);
+
+            log('data', 'ONFI Signature: 4F 4E 46 49 (ONFI)');
+            log('info', 'Page Size: 2112 bytes (2048 + 64 spare)');
+            log('info', 'Block Size: 64 pages');
+            log('info', 'Blocks: 4096');
+            log('info', 'P/E Cycles: 100,000');
+
+            setStatus(false, 'READY - Param Read Complete', NAND.states.IDLE);
+        }
+
+        async function cmdReadPage() {
+            const block = parseInt(document.getElementById('blockAddr').value) || 0;
+            const page = parseInt(document.getElementById('pageAddr').value) || 0;
+
+            if (block < 0 || block >= NAND.BLOCK_COUNT) {
+                log('err', 'Invalid block address');
+                return;
+            }
+            if (page < 0 || page >= NAND.PAGES_PER_BLOCK) {
+                log('err', 'Invalid page address');
                 return;
             }
 
-            const requestId = 'SR-' + new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+            log('cmd', `>> READ PAGE (00h-30h) Block:${block} Page:${page}`);
+            animatePins(['CLE', 'ALE', 'WE', 'RE']);
+            setStatus(true, `BUSY - Reading Block ${block} Page ${page}`, NAND.states.BSYR);
+            animateBlock(block, 'busy');
 
-            const request = {
-                request_id: requestId,
-                timestamp: new Date().toISOString(),
-                requester: {
-                    name: document.getElementById('requesterName').value,
-                    email: document.getElementById('requesterEmail').value,
-                    phone: document.getElementById('requesterPhone').value
-                },
-                customer: {
-                    name: document.getElementById('customerName').value,
-                    contact: document.getElementById('customerContact').value,
-                    location: document.getElementById('customerLocation').value
-                },
-                application: {
-                    type: document.getElementById('applicationType').value,
-                    current_solution: document.getElementById('currentSolution').value,
-                    annual_volume: document.getElementById('annualVolume').value
-                },
-                parts: selectedParts,
-                sample_qty: document.getElementById('sampleQty').value,
-                urgency: document.getElementById('urgency').value,
-                notes: document.getElementById('notes').value
-            };
+            await delay(NAND.tR);
 
-            // Store in localStorage
-            const requests = JSON.parse(localStorage.getItem('winbond_requests') || '[]');
-            requests.push(request);
-            localStorage.setItem('winbond_requests', JSON.stringify(requests));
+            // Generate data view
+            updateDataView(block, page);
 
-            // Show success and generate mailto link
-            const partsText = selectedParts.map(p => p.part_number).join(', ');
-            const emailBody = `Sample Request ID: ${requestId}%0D%0A%0D%0AParts: ${partsText}%0D%0AQuantity: ${request.sample_qty}%0D%0A%0D%0ACustomer: ${request.customer.name}%0D%0AApplication: ${request.application.type}%0D%0AVolume: ${request.application.annual_volume}%0D%0A%0D%0ANotes: ${request.notes}`;
+            log('ok', `Read complete: ${NAND.PAGE_SIZE} bytes`);
+            setStatus(false, 'READY - Read Complete', NAND.states.IDLE);
+        }
 
-            showAlert(`Request submitted! ID: <strong>${requestId}</strong><br><br><a href="mailto:samples@winbond.com?subject=Sample Request ${requestId}&body=${emailBody}" style="color: #155724; text-decoration: underline;">Click here to email this request</a>`, 'success');
+        async function cmdReadStatus() {
+            log('cmd', '>> READ STATUS (70h)');
+            animatePins(['CLE', 'WE']);
 
-            // Reset form
-            selectedParts = [];
-            updateSelectedDisplay();
-            renderParts();
-            this.reset();
-            document.getElementById('sampleQty').value = 10;
+            const statusBits = [
+                NAND.status & 0x01 ? 'FAIL' : 'PASS',
+                NAND.status & 0x20 ? 'READY' : 'BUSY',
+                NAND.status & 0x40 ? 'READY' : 'BUSY',
+                NAND.status & 0x80 ? 'WP_DIS' : 'WP_EN'
+            ];
+
+            log('data', `Status: 0x${NAND.status.toString(16).toUpperCase().padStart(2, '0')} [${statusBits.join(' | ')}]`);
+            setStatus(false, 'READY', NAND.states.IDLE);
+        }
+
+        async function cmdProgram() {
+            const block = parseInt(document.getElementById('blockAddr').value) || 0;
+            const page = parseInt(document.getElementById('pageAddr').value) || 0;
+
+            if (NAND.badBlocks.has(block)) {
+                log('err', `Block ${block} is marked BAD - program rejected`);
+                NAND.status |= 0x01;
+                return;
+            }
+
+            log('cmd', `>> PROGRAM PAGE (80h-10h) Block:${block} Page:${page}`);
+            animatePins(['CLE', 'ALE', 'WE']);
+            setStatus(true, `BUSY - Programming Block ${block} Page ${page}`, NAND.states.BSYPROG);
+            animateBlock(block, 'busy');
+
+            await delay(NAND.tPROG);
+
+            // Mark block as programmed
+            NAND.memory.set(`${block}:${page}`, generateRandomData());
+            updateBlockVisual(block, 'programmed');
+
+            log('ok', `Program complete: ${NAND.PAGE_SIZE} bytes written`);
+            NAND.status = 0xE0;
+            setStatus(false, 'READY - Program Complete', NAND.states.IDLE);
+        }
+
+        async function cmdErase() {
+            const block = parseInt(document.getElementById('blockAddr').value) || 0;
+
+            if (NAND.badBlocks.has(block)) {
+                log('err', `Block ${block} is marked BAD - erase rejected`);
+                NAND.status |= 0x01;
+                return;
+            }
+
+            log('cmd', `>> BLOCK ERASE (60h-D0h) Block:${block}`);
+            animatePins(['CLE', 'ALE', 'WE']);
+            setStatus(true, `BUSY - Erasing Block ${block}`, NAND.states.BSYERS);
+            animateBlock(block, 'busy');
+
+            await delay(NAND.tBERS);
+
+            // Clear all pages in block
+            for (let p = 0; p < NAND.PAGES_PER_BLOCK; p++) {
+                NAND.memory.delete(`${block}:${p}`);
+            }
+            updateBlockVisual(block, 'erased');
+
+            NAND.eraseCount++;
+            document.getElementById('statErase').textContent = NAND.eraseCount;
+
+            log('ok', `Erase complete: Block ${block} (64 pages cleared)`);
+            NAND.status = 0xE0;
+            setStatus(false, 'READY - Erase Complete', NAND.states.IDLE);
+        }
+
+        async function cmdReset() {
+            log('cmd', '>> RESET (FFh)');
+            animatePins(['CLE', 'WE']);
+            setStatus(true, 'BUSY - Resetting', NAND.states.BSYRST);
+
+            await delay(NAND.tRST);
+
+            NAND.status = 0xE0;
+            log('ok', 'Reset complete - chip idle');
+            setStatus(false, 'READY - Reset Complete', NAND.states.IDLE);
+        }
+
+        async function cmdChipErase() {
+            if (!confirm('Erase ALL blocks? This simulates a full chip erase.')) return;
+
+            log('cmd', '>> FULL CHIP ERASE');
+            setStatus(true, 'BUSY - Full Chip Erase', NAND.states.BSYERS);
+
+            const blocks = document.querySelectorAll('.block');
+            for (let i = 0; i < blocks.length; i++) {
+                blocks[i].classList.add('busy');
+                await delay(5);
+            }
+
+            await delay(500);
+
+            NAND.memory.clear();
+            blocks.forEach((b, i) => {
+                b.classList.remove('busy', 'programmed');
+                if (!NAND.badBlocks.has(i * 16)) {
+                    b.classList.add('erased');
+                }
+            });
+
+            NAND.eraseCount += 256;
+            document.getElementById('statErase').textContent = NAND.eraseCount;
+
+            log('ok', 'Full chip erase complete');
+            setStatus(false, 'READY', NAND.states.IDLE);
+        }
+
+        function updateBlockVisual(block, state) {
+            const blocks = document.querySelectorAll('.block');
+            const idx = Math.floor(block / 16);
+            if (blocks[idx] && !NAND.badBlocks.has(block)) {
+                blocks[idx].classList.remove('programmed', 'erased');
+                blocks[idx].classList.add(state);
+            }
+        }
+
+        function updateDataView(block = 0, page = 0) {
+            const container = document.getElementById('dataView');
+            container.innerHTML = '';
+
+            const data = NAND.memory.get(`${block}:${page}`) || new Uint8Array(256).fill(0xFF);
+
+            for (let i = 0; i < 256; i += 16) {
+                const row = document.createElement('div');
+                row.className = 'data-row';
+
+                const hexBytes = Array.from(data.slice(i, i + 16))
+                    .map(b => b.toString(16).toUpperCase().padStart(2, '0'))
+                    .join(' ');
+
+                const ascii = Array.from(data.slice(i, i + 16))
+                    .map(b => (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.')
+                    .join('');
+
+                row.innerHTML = `
+                    <span class="data-addr">0x${i.toString(16).toUpperCase().padStart(4, '0')}:</span>
+                    <span class="data-hex">${hexBytes}</span>
+                    <span class="data-ascii">${ascii}</span>
+                `;
+                container.appendChild(row);
+            }
+        }
+
+        function generateRandomData() {
+            const data = new Uint8Array(256);
+            for (let i = 0; i < 256; i++) {
+                data[i] = Math.floor(Math.random() * 256);
+            }
+            return data;
+        }
+
+        function showBlockDetails(block) {
+            document.getElementById('modalBlock').textContent = block;
+            const content = document.getElementById('modalContent');
+
+            const isBad = NAND.badBlocks.has(block);
+            const pages = [];
+            for (let p = 0; p < NAND.PAGES_PER_BLOCK; p++) {
+                pages.push(NAND.memory.has(`${block}:${p}`) ? 'P' : '.');
+            }
+
+            content.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <strong>Status:</strong> ${isBad ? '<span style="color:#ff4444">BAD BLOCK</span>' : '<span style="color:#00ff88">GOOD</span>'}
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Address Range:</strong> 0x${(block * 64 * 2112).toString(16).toUpperCase()} - 0x${((block + 1) * 64 * 2112 - 1).toString(16).toUpperCase()}
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Page Map (64 pages):</strong><br>
+                    <code style="font-size: 0.8rem; color: #00ccff; letter-spacing: 2px;">${pages.join('')}</code>
+                </div>
+                <div>
+                    <strong>Legend:</strong> P = Programmed, . = Erased/Empty
+                </div>
+            `;
+
+            document.getElementById('pageModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('pageModal').classList.remove('active');
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms / 10)); // Speed up for demo
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Close modal on escape
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
         });
-
-        // Event listeners for filters
-        ['categoryFilter', 'densityFilter', 'interfaceFilter', 'tempFilter', 'searchInput'].forEach(id => {
-            document.getElementById(id).addEventListener('change', renderParts);
-            document.getElementById(id).addEventListener('input', renderParts);
-        });
-
-        // Initialize
-        initFilters();
-        renderParts();
-        updateSelectedDisplay();
     </script>
 </body>
 </html>
