@@ -365,22 +365,14 @@
         .wave-data {
             position: absolute;
             height: 100%;
-            width: 200%;
-            background: linear-gradient(90deg,
-                #1a1a2e 0%, #1a1a2e 20%,
-                #00ff88 20%, #00ff88 22%,
-                #1a1a2e 22%, #1a1a2e 40%,
-                #00ff88 40%, #00ff88 42%,
-                #1a1a2e 42%, #1a1a2e 60%,
-                #00ff88 60%, #00ff88 62%,
-                #1a1a2e 62%, #1a1a2e 100%
-            );
-            animation: waveScroll 2s linear infinite;
+            width: 100%;
+            background: #1a1a2e;
+            border: 1px solid #00ff88;
+            border-radius: 2px;
         }
 
-        @keyframes waveScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+        .wave-data.active {
+            background: linear-gradient(90deg, #00ff88 0%, #00ff88 100%);
         }
 
         /* Stats Panel */
@@ -581,21 +573,7 @@
 
         <!-- Center Panel - Memory View & Console -->
         <div class="panel">
-            <div class="panel-title">Memory Array (4096 Blocks × 64 Pages × 2112 Bytes)</div>
-
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <span style="font-size: 0.7rem;">Block View (256 shown):</span>
-                <span style="font-size: 0.7rem; color: #004400;">■ Programmed</span>
-                <span style="font-size: 0.7rem; color: #1a1a2e;">■ Erased</span>
-                <span style="font-size: 0.7rem; color: #440000;">■ Bad</span>
-            </div>
-
-            <div class="memory-grid" id="memoryGrid"></div>
-
-            <div class="panel-title">Command Console</div>
-            <div class="console" id="console"></div>
-
-            <div class="panel-title">Timing Diagram</div>
+            <div class="panel-title">Signal Timing</div>
             <div class="timing-container" id="timingDiagram">
                 <div class="timing-signal">
                     <div class="timing-label">CLE</div>
@@ -622,6 +600,20 @@
                     <div class="timing-wave"><div class="wave-line" id="waveRB"></div></div>
                 </div>
             </div>
+
+            <div class="panel-title" style="margin-top: 15px;">Memory Array (4096 Blocks × 64 Pages × 2112 Bytes)</div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <span style="font-size: 0.7rem;">Block View (256 shown):</span>
+                <span style="font-size: 0.7rem; color: #004400;">■ Programmed</span>
+                <span style="font-size: 0.7rem; color: #1a1a2e;">■ Erased</span>
+                <span style="font-size: 0.7rem; color: #440000;">■ Bad</span>
+            </div>
+
+            <div class="memory-grid" id="memoryGrid"></div>
+
+            <div class="panel-title">Command Console</div>
+            <div class="console" id="console"></div>
         </div>
 
         <!-- Right Panel - Commands & Stats -->
